@@ -133,9 +133,9 @@ android {
         applicationId "com.bitrisefastlane"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 9
+        versionCode 10
         versionName "1.0"
-        archivesBaseName = "$applicationId-v$versionCode($versionName)"
+        archivesBaseName = "$applicationId-$versionCode"
     }
 
     System.out.println("RELEASE KEYSTORE PATH")
