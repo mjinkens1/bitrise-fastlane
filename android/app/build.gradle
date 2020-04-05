@@ -133,13 +133,10 @@ android {
         applicationId "com.bitrisefastlane"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 13
+        versionCode 14
         versionName "1.0"
         archivesBaseName = "$applicationId-$versionCode"
     }
-
-    System.out.println("RELEASE KEYSTORE PATH")
-    System.out.println(System.getenv("KEYSTORE_PATH"))
 
     signingConfigs {
         release {
@@ -170,7 +167,6 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            versionNameSuffix "test suffix release"
             signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
