@@ -133,7 +133,7 @@ android {
         applicationId "com.bitrisefastlane"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 18
+        versionCode 20
         versionName "1.0"
         archivesBaseName = "$applicationId-$versionCode"
     }
