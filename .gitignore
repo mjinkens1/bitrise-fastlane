@@ -62,3 +62,4 @@ buck-out/
 .env
 .env.default
 secure
+.bitrise.secrets.yml
