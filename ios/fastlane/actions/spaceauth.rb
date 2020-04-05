@@ -7,8 +7,11 @@ module Fastlane
     class SpaceauthAction < Action
       def self.run(params)
         result, status = Open3.capture2e("bundle exec fastlane spaceauth")
+        puts result
         cookie_export_cmd = result.split("Example:")[1].strip!
+        puts cookie export cmd
         cookie = cookie_export_cmd.split("export FASTLANE_SESSION=")[1]
+        puts cookie
 
         Actions.lane_context[SharedValues::SPACEAUTH_COOKIE] = cookie
       end
@@ -24,7 +27,7 @@ module Fastlane
       def self.details
         # Optional:
         # this is your chance to provide a more detailed description of this action
-        "You can use this action to do cool things..."
+        "This action provides a shared value that is the cookie parsed form the output of $ fastlane spaceauth, to be set as the FASTLANE_SESSION environment variable."
       end
 
       def self.available_options
