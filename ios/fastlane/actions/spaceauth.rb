@@ -6,7 +6,14 @@ module Fastlane
 
     class SpaceauthAction < Action
       def self.run(params)
-        result, status = Open3.capture2e("bundle exec fastlane spaceauth")
+        is_ci = params[:is_ci]
+        cmd = "bundle exec fastlane spaceauth"
+
+        if is_ci then
+            cmd = "fastlane spaceauth"
+        end
+
+        result, status = Open3.capture2e(cmd)
         puts result
         cookie_export_cmd = result.split("Example:")[1].strip!
         puts cookie export cmd

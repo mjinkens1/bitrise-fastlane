@@ -20,9 +20,8 @@ platform :ios do
   lane :beta do
     begin
         match(type: "appstore", readonly: is_ci)
-        spaceauth
+        spaceauth(is_ci: is_ci)
         ENV["FASTLANE_SESSION"] = lane_context[SharedValues::SPACEAUTH_COOKIE]
-
         increment_build_number
         commit_version_bump(
             message: "Fastlane iOS bump build number to #{lane_context[SharedValues::BUILD_NUMBER]} [ci skip]",
