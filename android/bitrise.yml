@@ -1,0 +1,82 @@
+format_version: '8'
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+project_type: react-native
+app:
+  envs:
+    - FASTLANE_XCODE_LIST_TIMEOUT: '120'
+    - FASTLANE_WORK_DIR: android
+      opts:
+        is_expand: false
+    - FASTLANE_LANE: android alpha
+      opts:
+        is_expand: false
+    - GITHUB_USER_EMAIL: matthew.jinkens@gmail.com
+      opts:
+        is_expand: false
+    - GITHUB_USER_NAME: Matt Jinkens
+      opts:
+        is_expand: false
+trigger_map:
+  - push_branch: staging
+    workflow: primary
+  - pull_request_source_branch: '*'
+    workflow: primary
+workflows:
+  primary:
+    steps:
+      - activate-ssh-key@4.0.3:
+          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
+      - script@1:
+          title: Configure Git
+          asset_urls:
+            icon.svg: https://bitrise-steplib-collection.s3.amazonaws.com/steps/script/assets/icon.svg
+          inputs:
+            - content:
+                "#!/usr/bin/env bash\n# fail if any commands fails\nset -e\n# debug
+                log\nset -x\n\n# Add Github to known hosts \nssh-keyscan -t rsa github.com
+                >> ~/.ssh/known_hosts\n\n# Configure Git user\ngit config --global user.name
+                $GITHUB_USER_NAME\ngit config --global user.email $GITHUB_USER_EMAIL"
+      - git-clone@4.0.17:
+          title: Clone Git Repository
+      - file-downloader@1:
+          title: Download Release Keystore
+          asset_urls:
+            icon.svg: https://bitrise-steplib-collection.s3.amazonaws.com/steps/file-downloader/assets/icon.svg
+          inputs:
+            - destination: $BITRISE_SOURCE_DIR/android/secure/bitrisefastlane-key.keystore
+            - source: $BITRISEIO_ANDROID_KEYSTORE_URL
+      - file-downloader@1:
+          title: Download Google JSON Secret File
+          asset_urls:
+            icon.svg: https://bitrise-steplib-collection.s3.amazonaws.com/steps/file-downloader/assets/icon.svg
+          inputs:
+            - source: $BITRISEIO_GOOGLE_JSON_SECRET_URL
+            - destination: $GOOGLE_JSON_SECRET_FILE
+      - install-react-native@0:
+          asset_urls:
+            icon.svg: https://bitrise-steplib-collection.s3.amazonaws.com/steps/install-react-native/assets/icon.svg
+      - npm@1:
+          title: Install JavaScript Dependencies
+          asset_urls:
+            icon.svg: https://bitrise-steplib-collection.s3.amazonaws.com/steps/npm/assets/icon.svg
+          inputs:
+            - workdir: '$BITRISE_SOURCE_DIR/..'
+            - command: install
+      - fastlane@2.6.0:
+          inputs:
+            - lane: $FASTLANE_LANE
+            - work_dir: $FASTLANE_WORK_DIR
+      - script@1:
+          title: Push Changes To Git Repository
+          asset_urls:
+            icon.svg: https://bitrise-steplib-collection.s3.amazonaws.com/steps/script/assets/icon.svg
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                # fail if any commands fails
+                set -e
+                # debug log
+                set -x
+
+                # Push latest to Git
+                git push origin HEAD:$BITRISE_GIT_BRANCH
