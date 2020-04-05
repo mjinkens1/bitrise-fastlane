@@ -133,7 +133,7 @@ android {
         applicationId "com.bitrisefastlane"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 12
+        versionCode 13
         versionName "1.0"
         archivesBaseName = "$applicationId-$versionCode"
     }
@@ -170,6 +170,7 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
+            versionNameSuffix "test suffix release"
             signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
