@@ -14,6 +14,9 @@ module Fastlane
         end
 
         result, status = Open3.capture2e(cmd)
+
+        return unless result
+
         puts result
         cookie_export_cmd = result.split("Example:")[1].strip!
         puts cookie_export_cmd
