@@ -16,7 +16,7 @@ module Fastlane
         result, status = Open3.capture2e(cmd)
         puts result
         cookie_export_cmd = result.split("Example:")[1].strip!
-        puts cookie export cmd
+        puts cookie_export_cmd
         cookie = cookie_export_cmd.split("export FASTLANE_SESSION=")[1]
         puts cookie
 
@@ -39,6 +39,12 @@ module Fastlane
 
       def self.available_options
         # Define all options your action supports. 
+        [
+            FastlaneCore::ConfigItem.new(key: :is_ci,
+                description: "Flag that indicates whether action is being run in a CI environement",
+                default_value: false,
+                type: Boolean),
+        ]
       end
 
       def self.output
