@@ -1,0 +1,88 @@
+format_version: '8'
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+project_type: react-native
+app:
+  envs:
+    - FASTLANE_XCODE_LIST_TIMEOUT: '120'
+    - opts:
+        is_expand: false
+      FASTLANE_WORK_DIR: .
+    - opts:
+        is_expand: false
+      FASTLANE_LANE: ios beta
+    - opts:
+        is_expand: false
+      GITHUB_USER_EMAIL: matthew.jinkens@gmail.com
+    - opts:
+        is_expand: false
+      GITHUB_USER_NAME: Matt Jinkens
+trigger_map:
+  - push_branch: '*'
+    workflow: primary
+  - pull_request_source_branch: '*'
+    workflow: primary
+workflows:
+  primary:
+    steps:
+      - activate-ssh-key@4.0.3:
+          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
+      - script@1:
+          title: Configure Git
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                # fail if any commands fails
+                set -e
+                # debug log
+                set -x
+
+                # Add github.com to known hosts
+                ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+
+                # Configure Git user
+                git config --global user.name $GITHUB_USER_NAME
+                git config --global user.email $GITHUB_USER_EMAIL
+      - git-clone@4.0.17:
+          title: Clone Git Repository
+      - install-react-native@0: {}
+      - npm@1:
+          inputs:
+            - command: install
+          title: Install JavaScript Dependencies
+      - ruby-script@2:
+          inputs:
+            - ruby_content: |
+                require 'open3'
+
+                result, error, status = Open3.capture3("fastlane spaceauth")
+
+                if status.success?
+                    cookie_export_cmd = result.split("Example:")[1]
+                    cookie = cookie_export_cmd.split("export FASTLANE_SESSION=")[1]
+
+                    ENV["FASTLANE_SESSION"] = cookie.strip!
+                end
+            - gemfile_content: |-
+                source 'https://rubygems.org'
+
+                gem "fastlane"
+          title: Refresh App Store Connect Session
+      - fastlane@2.6.0:
+          inputs:
+            - lane: '$FASTLANE_LANE'
+            - verbose_log: 'yes'
+            - work_dir: '$FASTLANE_WORK_DIR'
+          title: Fastlane Sign and Deploy
+      - script@1:
+          title: Push Changes To Git Repository
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                # fail if any commands fails
+                set -e
+                # debug log
+                set -x
+
+                # Push latest to Git
+                git push origin HEAD:$BITRISE_GIT_BRANCH
+      - deploy-to-bitrise-io@1.9.2: {}
